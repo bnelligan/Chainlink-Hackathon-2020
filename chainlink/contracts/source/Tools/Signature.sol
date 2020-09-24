@@ -1,16 +1,16 @@
-// SPDX-License-Identifier: GPL-3.0
-pragma solidity >0.6.99 <0.8.0;
-import "Access.sol";
+// SPDX-License-Identifier: MIT
+pragma solidity > 0.6.99 < 0.8.0;
 
-contract Receive is Access
+contract Signature
 {
 mapping (uint256 => bool) usedNonce;
 
 function claimPremium (address payable client , uint256 amount , uint256 nonce  , bytes memory signature) public {
     require (!usedNonce[nonce]);
         usedNonce[nonce] = true;
-        bytes32 message = prefixed(keccak256(abi.encodePacked(msg.sender,nonce,amount,this)));
+        bytes32 message = prefixed(keccak256(abi.encodePacked(client , nonce , amount , this)));
     require (recoverSigner(message , signature ) == client);
+        client.transfer(amount);
 }
 
 function destroyTransaction (address payable client) public {
