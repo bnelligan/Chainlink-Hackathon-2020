@@ -1,0 +1,89 @@
+body{
+  background: #FFFFFF;
+}
+header{
+  z-index: 1;
+  position: fixed; display: inline;
+  top: 0;
+  left: 0; right: 0;
+  padding: 10px;
+  background: #F5F5F5;
+  background-size: 100%;
+  font-size: 16px;
+  font-weight: bolder;
+  border-bottom: 1px solid #E0E0E0;
+  font-family: Comic Sans MS;
+  color: #000000;
+}
+span{
+  position: absolute;
+  top: 12px; margin-left: 8px;
+}
+header .menu{
+  margin-right: 8px; float: right; width: 24px;
+}
+header .icon{
+  width: 24px;
+}
+.section1{
+    z-index: 0;
+    color: #000000;
+    position: absolute;
+    left: 0; right: 0; margin-top: 32px; padding-bottom: 50px;
+}
+.section1 p{
+  padding: 30px;
+  font-size: 24px; font-weight: bolder; font-family: Times New Roman;
+  overflow: auto;
+}
+.section1 li{
+  font-family: Monospace; margin-bottom: 8px;
+}
+.section1 .start{
+  border-radius: 8px;
+  border: none; font-weight: bold;
+  padding: 8px 32px; position: relative;
+  left: 30%;
+  transition: 0.3s;
+  outline: none; background: #FFFFFF; 
+  border: 2px solid #1A237E;
+  color: #1A237E;
+}
+.section1 .start:hover{
+  background: #1A237E; color: #FFFFFF;
+}
+.article1{
+    z-index: 0;
+    position: absolute; left: 0;
+    margin-top: 450px; right: 0;
+}
+.article1 h3{
+    text-align: center; padding: 0 30px;
+    font-family: Times New Roman; margin-top: 50px;
+}
+.article1 ul li{
+    font-weight: bolder; font-size: 16px;
+}
+.article1 ul p{
+    font-family: monospace;
+}
+.article1 img{
+  width: 100px; margin: auto;
+  padding: 30px;
+}
+footer{
+  position: fixed;
+  border-top: 1px solid #E0E0E0;
+  padding: 8px;
+  background: #F5F5F5;
+  left: 0; right: 0;
+  bottom: 0;
+}
+footer a{
+  margin: 10px;
+  padding: 10px;
+  text-decoration: none;
+}
+footer img{
+  width: 24px
+}

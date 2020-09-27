@@ -11,3 +11,5 @@ smart contract language
 
 How it works
 =====================
+To run the app
+cd chainlink/djangoApps && python manage.py runserver
