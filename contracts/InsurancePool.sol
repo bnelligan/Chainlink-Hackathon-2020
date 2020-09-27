@@ -23,9 +23,10 @@ contract InsurancePool is AccessControl, Ownable {
     uint256 public memberMaxCount = 1000;
     uint256 public coverageMultiple = 10;
     uint256 public price = 3 ether;
-    uint256 public totalValue = 0;
-    uint256 public flatLimit = price.mult(coverageMultiple);
-    uint256 public poolTotal = 0;
+    uint256 public poolValue = 0 ether;
+    uint256 public coverageLimit = price.mult(coverageMultiple);
+    uint256 public duration = 365 days;
+    uint256 public disbursementCount = 0;
     
     mapping(address => bool) memberAutoRenew;
     mapping(address => uint256) memberDisbursements;
@@ -36,9 +37,6 @@ contract InsurancePool is AccessControl, Ownable {
     bytes32 public constant APPROVED_MEMBER_ROLE = keccak256("APPROVED_MEMBER");
     bytes32 public constant INSURED_MEMBER_ROLE = keccak256("INSURED_MEMBER");
 
-    mapping(address => bool) memberAutoRenew;
-    uint public duration = 365 days;
-    uint public disbursementCount = 0;
 
     constructor() public {
         owner = msg.sender;
@@ -52,7 +50,7 @@ contract InsurancePool is AccessControl, Ownable {
      * Contract owner grants APPROVED_MEMBER_ROLE so member can purchase insurance
      */
     function ApproveMember(address memberAddress) public onlyOwner {
-        
+        require(memberAddress != owner);
         grantRole(APPROVED_MEMBER_ROLE, memberAddress);
     }
 
@@ -96,26 +94,26 @@ contract InsurancePool is AccessControl, Ownable {
 
     /**  
      * Contract owner OR patient can release payment to the hospital
-    */
+     */
     function ApproveDisbursement(uint disbursementID)
     {
-
+        // 1: Retrieve the disbursement record
+        // !!! TODO !!!
     }
-
 
     /**
      * Member purchases the insurance
+     * Eth is transfered to the contract implicitly
      */
     function PurchaseInsurance(bool setAutoRenew) payable public
     {
         // 1: Check for member approved and they are the active member
-        require(hasRole(APPROVED_MEMBER_ROLE, msg.sender) && !hasRole(ACTIVE_MEMBER_ROLE, msg.sender));
-        // 2: Check payment amount and deduct amount in ETH
-        require(msg.value = price);
-        // !!! TODO !!!
+        require(hasRole(APPROVED_MEMBER_ROLE, msg.sender) && !hasRole(INSURED_MEMBER_ROLE, msg.sender));
+        // 2: Check payment amount
+        require(msg.value == price);
 
         // 3: Grant approved role
-        grantRole(ACTIVE_MEMBER_ROLE, msg.sender);
+        grantRole(INSURED_MEMBER_ROLE, msg.sender);
 
         // 4: Update member count and validate not above max
         memberCount = getRoleMemberCount();
@@ -128,10 +126,26 @@ contract InsurancePool is AccessControl, Ownable {
         // !!! TODO !!!
     }
 
-    function getBalance () view public returns(uint256){
-        return (memPool[msg.sender]);
+    /**
+     * Anyone can check the balance for any address
+     */
+    function GetMemberDisbursements() view public returns(uint256){
+        return (memberDisbursements[msg.sender]);
     }
+
+    /**
+     * Check if you have auto-renew enabled
+     */
     function GetAutoRenew () view public returns (bool){
+        
         return memberAutoRenew[msg.sender];
     }
+
+    /**
+     * Disable AutoRenew -- Can only be enabled by the member when purchasing new insurance
+     */
+     function DisableAutoRenew() {
+         require(hasRole(INSURED_MEMBER_ROLE, msg.sender));
+         memberAutoRenew[msg.sender] = false;
+     }
 } 
