@@ -1,18 +1,16 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.6.0;
-
+pragma solidity > 0.4.0 < 0.8.0;
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/math/Math.sol";
-import "@chainlink/contracts/ChainlinkClient.sol";
+//import "@chainlink/contracts/src/v0.6/ChainlinkClient.sol";
 
-contract InsurancePool is AccessControl, Ownable, ChainlinkClient {
+contract InsurancePool is AccessControl, Ownable {
     using SafeMath for uint256;
     
     struct Disbursement {
-        address payable hospitalAddress;
+        address hospitalAddress;
         address patientAddress;
         bytes32 ailment;
         uint256 cost;
@@ -65,8 +63,6 @@ contract InsurancePool is AccessControl, Ownable, ChainlinkClient {
         grantRole(HOSPITAL_ROLE, providerAddress);
     }
 
-    /
-
     /**
      * Member purchases the insurance
      * Eth is transfered to the contract implicitly
@@ -81,9 +77,9 @@ contract InsurancePool is AccessControl, Ownable, ChainlinkClient {
         grantRole(INSURED_MEMBER_ROLE, msg.sender);
         // 4: Update member count and validate not above max
         memberCount = getRoleMemberCount();
-        require(memberCount < memberMaxCount)
+        require(memberCount < memberMaxCount);
         // 5: Update coverage limits (no more than the pool balance)
-        flatLimit = min(price.mult(coverageMultiple), poolTotal);
+        coverageLimit = min(price.mult(coverageMultiple), poolTotal);
         // 6: Queue expiration job using ChainLink alarm clock
         // !!! TODO !!!
     }
@@ -129,7 +125,7 @@ contract InsurancePool is AccessControl, Ownable, ChainlinkClient {
         // 2: Validate disbursement is not already paid for
         require(disbursement.isPaid == false);
         // 3: Validate sender as contract owner or patient
-        require(hasRole(CONTRACT_OWNER_ROLE) || disbursement.patient == msg.sender)
+        require(hasRole(CONTRACT_OWNER_ROLE) || disbursement.patient == msg.sender);
         // 4: Send ETH to the hospital equal to disbursement value
         disbursement.hospitalAddress.transfer(disbursement.cost);
         // 5: Mark the disbursement as paid
@@ -150,7 +146,7 @@ contract InsurancePool is AccessControl, Ownable, ChainlinkClient {
      * Called by ChainLink alarm clock when the insurance period is expired
      */
     function ExpireInsurance() {
-        require(hasRole(INSURED_MEMBER_ROLE, msg.sender || hasRole)
+        // require(hasRole(INSURED_MEMBER_ROLE, msg.sender || hasR);
     }
     
 
