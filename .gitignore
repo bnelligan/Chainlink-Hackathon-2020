@@ -36,3 +36,7 @@ __pycache__
 .hypothesis/
 build/
 reports/
+
+contracts/.placeholder
+test/.placeholder
+node_modules
