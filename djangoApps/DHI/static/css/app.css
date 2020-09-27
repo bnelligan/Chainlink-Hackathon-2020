@@ -43,7 +43,7 @@ header .icon{
   border-radius: 8px;
   border: none; font-weight: bold;
   padding: 8px 32px; position: relative;
-  left: 30%;
+  left: 45%;
   transition: 0.3s;
   outline: none; background: #FFFFFF; 
   border: 2px solid #1A237E;
@@ -52,10 +52,19 @@ header .icon{
 .section1 .start:hover{
   background: #1A237E; color: #FFFFFF;
 }
+
+.sub-section {
+  text-align: center;
+}
+.start {
+text-align: center;
+left:30%;
+}
 .article1{
     z-index: 0;
     position: absolute; left: 0;
     margin-top: 450px; right: 0;
+    text-align: center;
 }
 .article1 h3{
     text-align: center; padding: 0 30px;
