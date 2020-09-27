@@ -4,9 +4,9 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/math/Math.sol";
-//import "@chainlink/contracts/src/v0.6/ChainlinkClient.sol";
+import "@chainlink/contracts/src/v0.6/ChainlinkClient.sol";
 
-contract InsurancePool is AccessControl, Ownable {
+contract InsurancePool is AccessControl, Ownable, ChainlinkClient {
     using SafeMath for uint256;
     
     struct Disbursement {
@@ -37,9 +37,19 @@ contract InsurancePool is AccessControl, Ownable {
     bytes32 public constant APPROVED_MEMBER_ROLE = keccak256("APPROVED_MEMBER");
     bytes32 public constant INSURED_MEMBER_ROLE = keccak256("INSURED_MEMBER");
 
-
-    constructor() public {
+    /**
+    * ChainLink KOVAN Oracle info:
+    * LINK token address: 0xa36085F69e2889c224210F603D836748e7dC0088
+    * Oracle address: 0x2f90A6D021db21e1B2A077c5a37B3C7E75D15b7e
+    * JobID: a7ab70d561d34eb49e9b1612fd2e044b
+    */
+    address _oracle = 0x2f90A6D021db21e1B2A077c5a37B3C7E75D15b7e;
+    bytes32 _jobId = "a7ab70d561d34eb49e9b1612fd2e044b";
+    uint256 oraclePayment;
+    
+    constructor(uint256 _oraclePayment) public {
         owner = msg.sender;
+        oraclePayment = _oraclePayment;
         _setupRole(CONTRACT_OWNER_ROLE, msg.sender);
         _setRoleAdmin(HOSPITAL_ROLE, CONTRACT_OWNER_ROLE);
         _setRoleAdmin(APPROVED_MEMBER_ROLE, CONTRACT_OWNER_ROLE);
@@ -80,8 +90,10 @@ contract InsurancePool is AccessControl, Ownable {
         require(memberCount < memberMaxCount);
         // 5: Update coverage limits (no more than the pool balance)
         coverageLimit = min(price.mult(coverageMultiple), poolTotal);
-        // 6: Queue expiration job using ChainLink alarm clock
-        // !!! TODO !!!
+        // 6: Queue expiration job using ChainLink alarm clock request
+        Chainlink.Request memory req = buildChainlinkRequest(_jobId, this, this.ExpireInsurance.selector);
+        req.addUint("until", now + duration);
+        sendChainlinkRequestTo(_oracle, req, oraclePayment);
     }
     
 
@@ -89,9 +101,7 @@ contract InsurancePool is AccessControl, Ownable {
      * Hospital calls this to request payment from the pool
      * Payment happens automatically IF instantPayment config is enabled
      */
-    function RequestDisbursement(address memberAddress, bytes32 procedure, uint256 amount)
-    public
-    {
+    function RequestDisbursement(address memberAddress, bytes32 procedure, uint256 amount) public {
         // Step 1: Check member balance
         require(memberDisbursements.add(amount) < flatLimit);
         // Step 2: Increase member disbursements
@@ -117,9 +127,7 @@ contract InsurancePool is AccessControl, Ownable {
     /**  
      * Contract owner OR patient can release payment to the hospital
      */
-    function ApproveDisbursement(uint disbursementID) 
-    public
-    {
+    function ApproveDisbursement(uint disbursementID) public {
         // 1: Retrieve the disbursement record
         Disbursement disbursement = disbursementLog[disbursementID];
         // 2: Validate disbursement is not already paid for
@@ -145,8 +153,22 @@ contract InsurancePool is AccessControl, Ownable {
     /**
      * Called by ChainLink alarm clock when the insurance period is expired
      */
-    function ExpireInsurance() {
-        // require(hasRole(INSURED_MEMBER_ROLE, msg.sender || hasR);
+    function ExpireInsurance(bytes32 _requestId) 
+    public
+    recordChainFulfillment(_requestId) {
+        // 1: Check that sender is insured member (unsure about interaction with chainlink node)
+        require(hasRole(INSURED_MEMBER_ROLE, msg.sender));
+        // 2: Zero outstanding coverage balance
+        memberDisbursements[msg.sender] = 0;
+        // 3: Check for auto-renew and still approved member
+        if(memberAutoRenew[msg.sender] == true && hasRole(APPROVED_MEMBER_ROLE, msg.sender)) {
+            // 3-1: Renew insurance
+            PurchaseInsurance(true);
+        }
+        else{
+            // 3-2: Cancel insurance
+            renounceRole(INSURED_MEMBER_ROLE, msg.sender);
+        }
     }
     
 
@@ -173,5 +195,5 @@ contract InsurancePool is AccessControl, Ownable {
     public view returns (uint) {
         return memberDisbursements[memberAddress];
     }
-   
+    
 } 
