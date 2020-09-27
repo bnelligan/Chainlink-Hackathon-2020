@@ -1,0 +1,37 @@
+{
+  "name": "dhi",
+  "version": "1.0.0",
+  "description": "Decentralized health insurance protocol for community funding",
+  "main": "truffle-config.js",
+  "directories": {
+    "test": "test"
+  },
+  "dependencies": {
+    "@chainlink/contracts": "0.0.10",
+    "@openzeppelin/contracts": "^3.2.0",
+    "solc": "^0.7.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bnelligan/Chainlink-Hackathon-2020.git"
+  },
+  "keywords": [
+    "health",
+    "insurance",
+    "defi",
+    "chainlink",
+    "community",
+    "healthcare",
+    "coverage"
+  ],
+  "author": "Brendan Nelligan, Caleb Oguntunde, May, Sepand Salehian",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/bnelligan/Chainlink-Hackathon-2020/issues"
+  },
+  "homepage": "https://github.com/bnelligan/Chainlink-Hackathon-2020#readme"
+}
